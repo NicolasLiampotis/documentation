@@ -1179,20 +1179,6 @@ where:
 urn:mace:egi.eu:group:fedcloud.egi.eu:role=vm_operator#aai.egi.eu
 ```
 
-#### Old Syntax (will be deprecated in a next release)
-
-An entitlement value expressing group membership and role information has the
-following syntax (components enclosed in square brackets are OPTIONAL):
-
-```text
-urn:mace:egi.eu:<GROUP-AUTHORITY>:[<GROUP>[:<SUBGROUP>:…]]:<ROLE>@<VO>
-```
-
-**Example:**
-
-```text
-urn:mace:egi.eu:aai.egi.eu:vm_operator@fedcloud.egi.eu
-```
 
 ### Capabilities
 
@@ -1207,7 +1193,7 @@ as a URN following the syntax defined in
 
 #### Syntax
 
-An entitlement value expressing group membership and role information has the
+An entitlement value expressing a capability has the
 following syntax (components enclosed in square brackets are OPTIONAL):
 
 ```text
@@ -1217,17 +1203,20 @@ following syntax (components enclosed in square brackets are OPTIONAL):
 where:
 
 - `<NAMESPACE>` is controlled by the e-infrastructure, research infrastructure
-or research   collaboration that manages the capability. It is in the form of `urn:<NID>:<DELEGATED-NAMESPACE>[:<SUBNAMESPACE>]...`
-where
-- `<NID>` is the namespace identifier associated with a URN namespace registered
-with IANA2, ensuring global uniqueness. Implementers SHOULD use one of the
-existing registered URN namespaces, such as `urn:mace`[[MACE](https://incommon.org/community/mace-registries/mace-urn-registry/)].
-- `<DELEGATED-NAMESPACE>` is a URN sub-namespace delegated from one of the IANA
-registered NIDs to an organisation representing the e-infrastructure, research
-infrastructure or research collaboration. It is RECOMMENDED that a publicly
-accessible URN value registry for each delegated namespace be provided.
+or research collaboration that manages the capability. The `<NAMESPACE>` of capabilities
+managed by Check-in is set to `urn:mace:egi.eu`, while, generally, it is in the form of
+`urn:<NID>:<DELEGATED-NAMESPACE>[:<SUBNAMESPACE>]...` where:
+  
+  - `<NID>` is the namespace identifier associated with a URN namespace registered
+  with IANA2, ensuring global uniqueness. Implementers SHOULD use one of the
+  existing registered URN namespaces, such as `urn:mace`[[MACE](https://incommon.org/community/mace-registries/mace-urn-registry/)].
+  
+  - `<DELEGATED-NAMESPACE>` is a URN sub-namespace delegated from one of the IANA
+  registered NIDs to an organisation representing the e-infrastructure, research
+  infrastructure or research collaboration. It is RECOMMENDED that a publicly
+  accessible URN value registry for each delegated namespace be provided.
 
-- The literal string “res”indicates that this is a resource-specificentitlement
+- The literal string `"res"` indicates that this is a resource-specific entitlement
 as opposed to, for example, an entitlement used for expressing group membership
 [AARC-G002](https://aarc-community.org/guidelines/aarc-g002/).
 
@@ -1254,7 +1243,8 @@ thus, it is introduced by the number sign ("#") character and terminated by the
 end of the URN. All characters must be encoded according to
 [RFC8141](https://tools.ietf.org/html/rfc8141). Hence, the `<AUTHORITY>` MUST NOT
 be considered when determining equivalence (Section 3 in [RFC8141](https://tools.ietf.org/html/rfc8141))
-of URN-formatted capabilities.
+of URN-formatted capabilities. The `<AUTHORITY>` of capabilities managed by Check-in
+is typically set to `aai.egi.eu`.
 
 **Example:**
 
