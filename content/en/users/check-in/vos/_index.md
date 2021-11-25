@@ -381,3 +381,58 @@ be supported in the future.
 1. Removing VO member:
 
    Same as the update but requires setting the membership status to `Deleted`
+ 
+## Connecting a VO to LDAP
+
+EGI Check-in provides read access to the VO(s) and to the members of the VO(s) through LDAP.
+
+There are two entity types in the LDAP:
+
+* People: Users of EGI Check-in, expressed as inetOrgPerson (with additional attributes/schemas).
+
+* Groups of collaboration members, expressed as groupOfMembers (with additional attributes/schema).
+
+### Connection Parameters
+
+**LDAP address**: ldaps://ldap.egi.aai.eu:636/
+
+**Base DN**: dc=\<vo_name\>,dc=ldap,dc=egi,dc=aai,dc=eu
+
+**Bind DN**: \<provided by EGI Check-in support\>
+
+The `Bind DN` and `Bind Password` will be assigned by the EGI Check-in team when you request LDAP connection. In order to get LDAP credentials you must send email to `checkin-support@mailman.egi.eu` with Subject `Request LDAP access for <vo_name> VO` and refer to the Body Message, the instance of EGI Check-in (dev, demo, production) you request access. Only VO managers can have access to LDAP.
+
+### Entities
+
+**User**
+
+Users are present in the ou=people subtree.
+
+| Attribute   	| Description                 | Example                                                         	|
+|-------------	|----------------------------	|-----------------------------------------------------------------	|
+| objectClass 	|                            	| inetOrgPerson<br/> eduPerson<br/> voPerson<br/> eduMember<br/> ldapPublicKey 	|
+| voPersonId  	| voPerson unique identifier (epuid) 	| `befd2b9ed8878c542555829cb21da3e25ad91a0f9cg54gsdcs35htf@egi.eu`                                                             	|
+| uid | user id | john.doe |
+| cn          	| Common name                 | John Doe |
+| displayName   | Full name                   | John Doe |
+| givenName     | First name                  | John          |
+| sn            | Last name                   | Doe      |
+| mail          | Email address               |      john.doe@mail.com         |
+| edupersonUniqueID | A long-lived, non re-assignable, omnidirectional identifier. The value is same to voPersonId  | `befd2b9ed8878c542555829cb21da3e25ad91a0f9cg54gsdcs35htf@egi.eu` |
+| eduPersonPrincipalName | A scoped identifier for a person. The value is same to edupersonUniqueID | `befd2b9ed8878c542555829cb21da3e25ad91a0f9cg54gsdcs35htf@egi.eu` |
+| eduPersonEntitlement | URN that indicates a set of rights to specific resources | urn:mace:egi.eu:group:vo.example.org:role=member#aai.egi.eu |
+| sshPublicKey | SSH public key | |
+| isMemberOf | Group memberships | CO:COU:vo.example.org:members |
+| voPersonCertificateDN | The Subject Distinguished Name of an X.509 certificate held by the person | voPersonCertificateDN;scope-cert1: CN=John Doe A251,O=Example,C=US,DC=cilogon,DC=org |
+| voPersonCertificateIssuerDN | The Subject Distinguished Name of the X.509 certificate issuer | voPersonCertificateIssuerDN;scope-cert1: CN=CILogon Basic CA 1, O=CILogon, C=US, DC=cilogon, DC=org |
+
+**Group**
+
+Groups are present in the ou=groups subtree.
+
+| Attribute   	| Description                 | Example                                                         	|
+|-------------	|----------------------------	|-----------------------------------------------------------------	|
+| objectClass 	|                            	| groupofNames<br/> eduMember 	|
+| cn 	          | Common name                	| CO:COU:vo.example.org:members |
+| description   | The description of group    | CO:COU:vo.example.org Members |
+| member        | The members of this group (multivalued)   | `voPersonID=befd2b9ed8878c542555829cb21da3e25ad91a0f9cg54gsdcs35htf@egi.eu` |
