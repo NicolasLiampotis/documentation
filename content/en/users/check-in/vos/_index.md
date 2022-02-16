@@ -282,7 +282,7 @@ From the steps defined [above](#managing-cou-admin-members):
 
    ![Group members tab](./check-in-group-members-tab.png)
 
-## VO membership API
+## VO membership API v1 (DEPRECATED)
 
 Check-in provides a REST API that allows clients to manage membership
 information only for the VOs they are authoritative for.
@@ -296,14 +296,14 @@ Features:
 - Check-in automatically changes the membership status from `Active` to
   `Expired` beyond the validity period
 
-### Authentication
+### Authentication v1
 
 The REST client is authenticated via username/password credentials transmitted
 over HTTPS using the Basic Authentication scheme. More sophisticated
 authentication mechanisms, such as OpenID Connect/OAuth 2.0 access tokens, may
 be supported in the future.
 
-### Methods
+### Methods v1
 
 1. Adding a user to a VO requires specifying the user's EGI Check-in ePUID, the
    name of the VO (e.g. `vo.access.egi.eu` in the case of LToS), the status
@@ -381,6 +381,170 @@ be supported in the future.
 1. Removing VO member:
 
   Same as the update but requires setting the membership status to `Deleted`
+
+## VO membership API v2
+
+Check-in provides a REST API that allows clients to manage membership
+information only for the VOs they are authoritative for.
+
+Features:
+
+- Members of the VO are identified via their EGI Check-in ePUID
+- Membership can be limited to a specified period
+- Different membership status values are supported, namely `Active`, `Expired`,
+  `Deleted`
+- Check-in automatically changes the membership status from `Active` to
+  `Expired` beyond the validity period
+
+### Authentication
+
+The REST client is authenticated via username/password credentials transmitted
+over HTTPS using the Basic Authentication scheme. More sophisticated
+authentication mechanisms, such as OpenID Connect/OAuth 2.0 access tokens, may
+be supported in the future.
+
+### Methods
+
+1. Adding a user to a VO requires specifying the user's EGI Check-in ePUID, the
+   name of the VO (e.g. `vo.access.egi.eu` in the case of LToS), the status
+   (`Active`) and the valid from/through dates. All these parameters are
+   mandatory. Here is an example using curl (see example `add.json` file below):
+
+   ```sh
+   curl -vX POST https://aai.egi.eu/registry/co_person_roles.json \
+        --user "example-client":"veryverysecret" \
+        --data @add.json \
+        --header "Content-Type: application/json"
+   ```
+
+   `ad.json`:
+
+   ```json
+   {
+      "RequestType": "CoPersonRoles",
+      "Version": "1.0",
+      "CoPersonRoles": [
+         {
+            "Version": "1.0",
+            "Person": {
+               "Type": "CO",
+               "Identifier": {
+                  "Type": "epuid",
+                  "Id": "01234567890123456789@egi.eu"
+               }
+            },
+            "Cou": {
+               "CoId": "2",
+               "Name": "vo.access.egi.eu"
+            },
+            "Affiliation": "member",
+            "Title": "Engineer",
+            "Status": "Active",
+            "ValidFrom": "2022-02-16 11:19:38",
+            "ValidThrough": "2022-05-16 11:19:38"
+         }
+      ]
+   }
+   ```
+
+1. Retrieving the VO membership information for a given EGI Check-in ePUID:
+
+   ```sh
+   curl -vX GET https://aai.egi.eu/registry/co_person_roles/co/2/cou/vo.access.egi.eu/identifier/01234567890123456789@egi.eu.json \
+        --user "example-client":"veryverysecret"
+   ```
+
+   output:
+
+   ```json
+   {
+      "RequestType": "CoPersonRoles",
+      "Version": "1.0",
+      "CoPersonRoles": [
+         {
+            "Version": "1.0",
+            "Person": {
+               "Type": "CO",
+               "Id": 1111
+            },
+            "CouId": 13,
+            "Affiliation": "member",
+            "Title": "Pilot",
+            "Status": "Active",
+            "Created": "2022-02-16 11:19:38",
+            "Modified": "2022-02-16 11:20:27",
+            "Revision": 2,
+            "Deleted": false,
+            "ActorIdentifier": "co_2.test"
+         }
+      ]
+   }
+   ```
+
+   Beyond the `valid_through` date, the status will be automatically changed to
+   `Expired`. So, when querying for VO membership information, it's important to
+   check that the status is actually set to `Active` for each of the identified
+   VOs.
+
+1. Retrieving all VO members:
+
+   ```sh
+   curl -vX GET https://aai.egi.eu/registry/co_person_roles/co/2/cou/vo.access.egi.eu.json \
+        --user "example-client":"veryverysecret"
+   ```
+
+   output:
+
+   ```json
+   {
+      "RequestType": "CoPersonRoles",
+      "Version": "1.0",
+      "CoPersonRoles": [
+         {
+            "Version": "1.0",
+            "Person": {
+               "Type": "CO",
+               "Id": 1111
+            },
+            "CouId": 13,
+            "Affiliation": "member",
+            "Title": "Pilot",
+            "Status": "Active",
+            "Created": "2022-02-16 11:19:38",
+            "Modified": "2022-02-16 11:20:27",
+            "Revision": 2,
+            "Deleted": false,
+            "ActorIdentifier": "co_2.test"
+         },
+         {...},
+         {...}
+      ]
+   }
+   ```
+
+   Beyond the `valid_through` date, the status will be automatically changed to
+   `Expired`. So, when querying for VO membership information, it's important to
+   check that the status is actually set to `Active` for each of the identified
+   VOs.
+
+1. Updating existing VO membership record:
+
+   ```sh
+   curl -vX PUT https://aai.egi.eu/registry/co_person_roles/15.json \
+        --user "example-client":"veryverysecret"  \
+        --data @update.json \
+        --header "Content-Type: application/json"
+   ```
+
+   The request body is the same as the one used for adding new members but
+   update requires:
+   - using `PUT` instead of `POST`.
+   - provide the Role ID as part of the request URL
+
+1. Removing VO member:
+
+  Same as the update but requires setting the membership status to `Deleted`
+  and do not include a body.
 
 ## LDAP
 
